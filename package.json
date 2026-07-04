@@ -1,0 +1,28 @@
+{
+  "name": "jq-ajax",
+  "version": "1.0.0",
+  "description": "[English](README.md) | [简体中文](README.ZH.md) | [日本語](README.JA.md)",
+  "main": "jQuery.1.11.1.ajax.min.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MeMrVincent/jq-ajax.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/MeMrVincent/jq-ajax/issues"
+  },
+  "homepage": "https://github.com/MeMrVincent/jq-ajax#readme",
+  "dependencies": {
+    "jquery": "^4.0.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-terser": "^1.0.0",
+    "rollup": "^4.62.2"
+  }
+}

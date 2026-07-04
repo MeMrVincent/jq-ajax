@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jq-Ajax 工具库演示页面</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Jq-Ajax 工具库 V2</h1>
+      <p>精简、独立、轻量级的 jQuery Ajax 与 Promise 封装库 (18.6KB)</p>
+    </header>
+
+    <div class="lang-switcher">
+      <a href="index.html" class="btn-lang">English</a>
+      <a href="index.ZH.html" class="btn-lang active">简体中文</a>
+      <a href="index.JA.html" class="btn-lang">日本語</a>
+    </div>
+
+    <div class="grid">
+      <!-- 标准 Ajax 请求卡片 -->
+      <div class="card">
+        <div class="card-title">
+          <span>标准 Ajax 请求</span>
+          <span class="badge">XMLHttpRequest</span>
+        </div>
+        <div class="form-group">
+          <label for="ajax-url">目标接口 URL 地址</label>
+          <input type="text" id="ajax-url" value="https://jsonplaceholder.typicode.com/todos/1">
+        </div>
+        <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+          <div>
+            <label for="ajax-method">请求方法 (Method)</label>
+            <select id="ajax-method"
+              style="width: 100%; background-color: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.6rem; color: var(--text-color); font-family: inherit; font-size: 0.9rem;">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+            </select>
+          </div>
+          <div>
+            <label for="ajax-datatype">返回数据类型 (dataType)</label>
+            <select id="ajax-datatype"
+              style="width: 100%; background-color: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.6rem; color: var(--text-color); font-family: inherit; font-size: 0.9rem;">
+              <option value="json">JSON</option>
+              <option value="xml">XML</option>
+              <option value="html">HTML</option>
+              <option value="text">Text (txt)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="ajax-data">请求负载数据 (JSON 或 字符串参数)</label>
+          <textarea id="ajax-data" placeholder='例如：{"title": "foo"} 或 name=Vincent'
+            style="width: 100%; background-color: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.6rem; color: var(--text-color); font-family: inherit; font-size: 0.9rem; height: 60px; resize: none;"></textarea>
+        </div>
+        <button class="btn btn-success" id="btn-ajax-send">发送 Ajax 请求</button>
+      </div>
+
+      <!-- POST 请求卡片 -->
+      <div class="card">
+        <div class="card-title">
+          <span>POST 一键测试</span>
+          <span class="badge">HTTP POST (JSON)</span>
+        </div>
+        <div class="form-group">
+          <label for="post-url">目标接口 URL 地址</label>
+          <input type="text" id="post-url" value="https://jsonplaceholder.typicode.com/posts">
+        </div>
+        <div class="form-group">
+          <label for="post-data">POST 请求负载数据 (JSON 模板)</label>
+          <textarea id="post-data" style="width: 100%; background-color: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.6rem; color: var(--text-color); font-family: inherit; font-size: 0.9rem; height: 60px; resize: none;">{"title": "Vincent POST Test", "body": "jQuery rebuild works!", "userId": 1}</textarea>
+        </div>
+        <button class="btn btn-success" id="btn-ajax-post" style="background-color: var(--primary);">发送 POST 请求</button>
+      </div>
+
+      <!-- JSONP 请求卡片 -->
+      <div class="card">
+        <div class="card-title">
+          <span>JSONP 跨域请求</span>
+          <span class="badge">脚本注入 (Script)</span>
+        </div>
+        <div class="form-group">
+          <label for="jsonp-url">跨域 JSONP URL 地址</label>
+          <input type="text" id="jsonp-url" value="https://api.github.com/users/MeMrVincent">
+        </div>
+        <button class="btn" id="btn-jsonp-get">发送 JSONP 请求</button>
+      </div>
+
+      <!-- 日志控制台 -->
+      <div class="card full-width">
+        <div class="card-title">控制台日志 & Deferred 状态监控</div>
+        <div class="log-box" id="log-console">等待操作中...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 库文件脚本 -->
+  <script src="jQuery.1.11.1.ajax.rebuild.js"></script>
+  <!--<script src="jQuery.1.11.1.ajax.release.js"></script>-->
+  <!--<script src="jQuery.1.11.1.ajax.min.default.js"></script>-->
+
+  <!-- 执行逻辑 -->
+  <script>
+    const logBox = document.getElementById('log-console');
+    function log(msg) {
+      const time = new Date().toLocaleTimeString();
+      const formatted = `[${time}] ${msg}\n`;
+      if (logBox.innerText === '等待操作中...') {
+        logBox.innerText = `[系统] 已成功将 Jq-Ajax 挂载至 window.J$ (对全局 $ 和 jQuery 零污染)。\n` + formatted;
+      } else {
+        logBox.innerText += formatted;
+      }
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    // 1. 发送 AJAX 请求 (GET/POST，包含 JSON/XML/HTML/Text)
+    document.getElementById('btn-ajax-send').addEventListener('click', function () {
+      const url = document.getElementById('ajax-url').value;
+      const method = document.getElementById('ajax-method').value;
+      const dataType = document.getElementById('ajax-datatype').value;
+      const dataRaw = document.getElementById('ajax-data').value.trim();
+
+      let data = undefined;
+      if (dataRaw) {
+        try {
+          data = JSON.parse(dataRaw);
+        } catch (e) {
+          data = dataRaw;
+        }
+      }
+
+      log(`[XHR] 开始发起 ${method} 请求: ${url} | dataType: ${dataType}`);
+
+      window.J$.ajax({
+        url: url,
+        type: method,
+        dataType: dataType,
+        data: data
+      })
+        .done(function (res) {
+          let output = res;
+          if (dataType === 'json') {
+            output = JSON.stringify(res);
+          } else if (dataType === 'xml') {
+            output = res && res.nodeType ? new XMLSerializer().serializeToString(res) : `${res}`;
+          } else if (res && res.nodeType) {
+            output = res.outerHTML || res.textContent;
+          }
+          log(`[XHR 成功] 收到 ${dataType.toUpperCase()} 类型响应:\n${output}`);
+        })
+        .fail(function (xhr, status, error) {
+          log(`[XHR 失败] 状态: ${status}, 错误: ${error && error.message || error}`);
+        });
+    });
+
+    // 2. 发送 POST 请求
+    document.getElementById('btn-ajax-post').addEventListener('click', function () {
+      const url = document.getElementById('post-url').value;
+      const dataRaw = document.getElementById('post-data').value.trim();
+
+      let data = undefined;
+      if (dataRaw) {
+        try {
+          data = JSON.parse(dataRaw);
+        } catch (e) {
+          data = dataRaw;
+        }
+      }
+
+      log(`[XHR POST] 开始发起 POST 请求: ${url}`);
+
+      window.J$.ajax({
+        url: url,
+        type: 'POST',
+        dataType: 'json',
+        data: data
+      })
+        .done(function (res) {
+          log(`[XHR POST 成功] 收到响应:\n${JSON.stringify(res)}`);
+        })
+        .fail(function (xhr, status, error) {
+          log(`[XHR POST 失败] 状态: ${status}, 错误: ${error && error.message || error}`);
+        });
+    });
+
+    // 3. 发送 JSONP 请求
+    document.getElementById('btn-jsonp-get').addEventListener('click', function () {
+      const url = document.getElementById('jsonp-url').value;
+      log(`[JSONP] 开始发起跨域请求: ${url}`);
+
+      window.J$.ajax({
+        url: url,
+        dataType: 'jsonp',
+        jsonp: 'callback'
+      })
+        .done(function (data) {
+          log(`[JSONP 成功] 收到封装好的 JSONP 包装响应:\n${JSON.stringify(data.meta || data)}`);
+        })
+        .fail(function (xhr, status, error) {
+          log(`[JSONP 失败] 状态: ${status}, 错误: ${error && error.message || error}`);
+        });
+    });
+  </script>
+</body>
+
+</html>

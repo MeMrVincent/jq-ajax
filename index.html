@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jq-Ajax Library V2 Demo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Jq-Ajax Library V2</h1>
+      <p>Cleaned, independent, lightweight jQuery Ajax & Promise wrapper (18.6KB)</p>
+    </header>
+
+    <div class="lang-switcher">
+      <a href="index.html" class="btn-lang active">English</a>
+      <a href="index.ZH.html" class="btn-lang">简体中文</a>
+      <a href="index.JA.html" class="btn-lang">日本語</a>
+    </div>
+
+    <div class="grid">
+      <!-- Standard AJAX Card -->
+      <div class="card">
+        <div class="card-title">
+          <span>Standard Ajax Request</span>
+          <span class="badge">XMLHttpRequest</span>
+        </div>
+        <div class="form-group">
+          <label for="ajax-url">Target Endpoint URL</label>
+          <input type="text" id="ajax-url" value="https://jsonplaceholder.typicode.com/todos/1">
+        </div>
+        <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+          <div>
+            <label for="ajax-method">Request Method</label>
+            <select id="ajax-method"
+              style="width: 100%; background-color: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.6rem; color: var(--text-color); font-family: inherit; font-size: 0.9rem;">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+            </select>
+          </div>
+          <div>
+            <label for="ajax-datatype">Data Type (dataType)</label>
+            <select id="ajax-datatype"
+              style="width: 100%; background-color: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.6rem; color: var(--text-color); font-family: inherit; font-size: 0.9rem;">
+              <option value="json">JSON</option>
+              <option value="xml">XML</option>
+              <option value="html">HTML</option>
+              <option value="text">Text (txt)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="ajax-data">Request Payload / Data (JSON or String)</label>
+          <textarea id="ajax-data" placeholder='e.g. {"title": "foo"} or name=Vincent'
+            style="width: 100%; background-color: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.6rem; color: var(--text-color); font-family: inherit; font-size: 0.9rem; height: 60px; resize: none;"></textarea>
+        </div>
+        <button class="btn btn-success" id="btn-ajax-send">Send Ajax Request</button>
+      </div>
+
+      <!-- POST AJAX Card -->
+      <div class="card">
+        <div class="card-title">
+          <span>POST Request</span>
+          <span class="badge">HTTP POST (JSON)</span>
+        </div>
+        <div class="form-group">
+          <label for="post-url">Target Endpoint URL</label>
+          <input type="text" id="post-url" value="https://jsonplaceholder.typicode.com/posts">
+        </div>
+        <div class="form-group">
+          <label for="post-data">POST Data (JSON Payload)</label>
+          <textarea id="post-data" style="width: 100%; background-color: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.6rem; color: var(--text-color); font-family: inherit; font-size: 0.9rem; height: 60px; resize: none;">{"title": "Vincent POST Test", "body": "jQuery rebuild works!", "userId": 1}</textarea>
+        </div>
+        <button class="btn btn-success" id="btn-ajax-post" style="background-color: var(--primary);">Send POST Request</button>
+      </div>
+
+      <!-- JSONP Card -->
+      <div class="card">
+        <div class="card-title">
+          <span>JSONP Request</span>
+          <span class="badge">Script Injection</span>
+        </div>
+        <div class="form-group">
+          <label for="jsonp-url">Cross-domain JSONP URL</label>
+          <input type="text" id="jsonp-url" value="https://api.github.com/users/MeMrVincent">
+        </div>
+        <button class="btn" id="btn-jsonp-get">Send JSONP Request</button>
+      </div>
+
+      <!-- Console Logs -->
+      <div class="card full-width">
+        <div class="card-title">Console Logs & Deferred Status</div>
+        <div class="log-box" id="log-console">Waiting for actions...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Library Script -->
+  <script src="jQuery.1.11.1.ajax.rebuild.js"></script>
+  <!--<script src="jQuery.1.11.1.ajax.release.js"></script>-->
+  <!--<script src="jQuery.1.11.1.ajax.min.default.js"></script>-->
+
+  <!-- Execution logic -->
+  <script>
+    const logBox = document.getElementById('log-console');
+    function log(msg) {
+      const time = new Date().toLocaleTimeString();
+      const formatted = `[${time}] ${msg}\n`;
+      if (logBox.innerText === 'Waiting for actions...') {
+        logBox.innerText = `[System] Exposed Jq-Ajax directly to window.J$ (zero pollution to $ or jQuery).\n` + formatted;
+      } else {
+        logBox.innerText += formatted;
+      }
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    // 1. AJAX Request (GET/POST with JSON/XML/HTML/Text)
+    document.getElementById('btn-ajax-send').addEventListener('click', function () {
+      const url = document.getElementById('ajax-url').value;
+      const method = document.getElementById('ajax-method').value;
+      const dataType = document.getElementById('ajax-datatype').value;
+      const dataRaw = document.getElementById('ajax-data').value.trim();
+
+      let data = undefined;
+      if (dataRaw) {
+        try {
+          data = JSON.parse(dataRaw);
+        } catch (e) {
+          data = dataRaw;
+        }
+      }
+
+      log(`[XHR] Initiating ${method} request to: ${url} | dataType: ${dataType}`);
+
+      window.J$.ajax({
+        url: url,
+        type: method,
+        dataType: dataType,
+        data: data
+      })
+        .done(function (res) {
+          let output = res;
+          if (dataType === 'json') {
+            output = JSON.stringify(res);
+          } else if (dataType === 'xml') {
+            output = res && res.nodeType ? new XMLSerializer().serializeToString(res) : `${res}`;
+          } else if (res && res.nodeType) {
+            output = res.outerHTML || res.textContent;
+          }
+          log(`[XHR Success] Received ${dataType.toUpperCase()} response:\n${output}`);
+        })
+        .fail(function (xhr, status, error) {
+          log(`[XHR Fail] Status: ${status}, Error: ${error && error.message || error}`);
+        });
+    });
+
+    // 2. AJAX POST Action
+    document.getElementById('btn-ajax-post').addEventListener('click', function () {
+      const url = document.getElementById('post-url').value;
+      const dataRaw = document.getElementById('post-data').value.trim();
+
+      let data = undefined;
+      if (dataRaw) {
+        try {
+          data = JSON.parse(dataRaw);
+        } catch (e) {
+          data = dataRaw;
+        }
+      }
+
+      log(`[XHR POST] Initiating POST request to: ${url}`);
+
+      window.J$.ajax({
+        url: url,
+        type: 'POST',
+        dataType: 'json',
+        data: data
+      })
+        .done(function (res) {
+          log(`[XHR POST Success] Received response:\n${JSON.stringify(res)}`);
+        })
+        .fail(function (xhr, status, error) {
+          log(`[XHR POST Fail] Status: ${status}, Error: ${error && error.message || error}`);
+        });
+    });
+
+    // 3. JSONP GET Action
+    document.getElementById('btn-jsonp-get').addEventListener('click', function () {
+      const url = document.getElementById('jsonp-url').value;
+      log(`[JSONP] Initiating cross-domain request to: ${url}`);
+
+      window.J$.ajax({
+        url: url,
+        dataType: 'jsonp',
+        jsonp: 'callback'
+      })
+        .done(function (data) {
+          log(`[JSONP Success] Received JSONP wrapper response:\n${JSON.stringify(data.meta || data)}`);
+        })
+        .fail(function (xhr, status, error) {
+          log(`[JSONP Fail] Status: ${status}, Error: ${error && error.message || error}`);
+        });
+    });
+  </script>
+</body>
+
+</html>

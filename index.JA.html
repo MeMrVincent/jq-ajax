@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jq-Ajax ライブラリ デモ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Jq-Ajax Library V2</h1>
+      <p>無駄を削ぎ落とした、独立・軽量の jQuery Ajax & Promise ラッパー (18.6KB)</p>
+    </header>
+
+    <div class="lang-switcher">
+      <a href="index.html" class="btn-lang">English</a>
+      <a href="index.ZH.html" class="btn-lang">简体中文</a>
+      <a href="index.JA.html" class="btn-lang active">日本語</a>
+    </div>
+
+    <div class="grid">
+      <!-- 標準 Ajax リクエストカード -->
+      <div class="card">
+        <div class="card-title">
+          <span>標準 Ajax リクエスト</span>
+          <span class="badge">XMLHttpRequest</span>
+        </div>
+        <div class="form-group">
+          <label for="ajax-url">宛先エンドポイント URL</label>
+          <input type="text" id="ajax-url" value="https://jsonplaceholder.typicode.com/todos/1">
+        </div>
+        <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+          <div>
+            <label for="ajax-method">リクエストメソッド (Method)</label>
+            <select id="ajax-method"
+              style="width: 100%; background-color: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.6rem; color: var(--text-color); font-family: inherit; font-size: 0.9rem;">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+            </select>
+          </div>
+          <div>
+            <label for="ajax-datatype">期待するデータ型 (dataType)</label>
+            <select id="ajax-datatype"
+              style="width: 100%; background-color: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.6rem; color: var(--text-color); font-family: inherit; font-size: 0.9rem;">
+              <option value="json">JSON</option>
+              <option value="xml">XML</option>
+              <option value="html">HTML</option>
+              <option value="text">Text (txt)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="ajax-data">リクエストペイロードデータ (JSON または 文字列)</label>
+          <textarea id="ajax-data" placeholder='例：{"title": "foo"} または name=Vincent'
+            style="width: 100%; background-color: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.6rem; color: var(--text-color); font-family: inherit; font-size: 0.9rem; height: 60px; resize: none;"></textarea>
+        </div>
+        <button class="btn btn-success" id="btn-ajax-send">Ajaxリクエスト送信</button>
+      </div>
+
+      <!-- POST リクエストカード -->
+      <div class="card">
+        <div class="card-title">
+          <span>POST 簡単テスト</span>
+          <span class="badge">HTTP POST (JSON)</span>
+        </div>
+        <div class="form-group">
+          <label for="post-url">宛先エンドポイント URL</label>
+          <input type="text" id="post-url" value="https://jsonplaceholder.typicode.com/posts">
+        </div>
+        <div class="form-group">
+          <label for="post-data">POST データ (JSON テンプレート)</label>
+          <textarea id="post-data" style="width: 100%; background-color: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.6rem; color: var(--text-color); font-family: inherit; font-size: 0.9rem; height: 60px; resize: none;">{"title": "Vincent POST Test", "body": "jQuery rebuild works!", "userId": 1}</textarea>
+        </div>
+        <button class="btn btn-success" id="btn-ajax-post" style="background-color: var(--primary);">POST リクエスト送信</button>
+      </div>
+
+      <!-- JSONP リクエストカード -->
+      <div class="card">
+        <div class="card-title">
+          <span>JSONP クロスドメイン要求</span>
+          <span class="badge">スクリプト挿入 (Script)</span>
+        </div>
+        <div class="form-group">
+          <label for="jsonp-url">クロスドメイン JSONP URL</label>
+          <input type="text" id="jsonp-url" value="https://api.github.com/users/MeMrVincent">
+        </div>
+        <button class="btn" id="btn-jsonp-get">JSONP リクエスト送信</button>
+      </div>
+
+      <!-- ログコンソール -->
+      <div class="card full-width">
+        <div class="card-title">コンソールログ & Deferred 状態監視</div>
+        <div class="log-box" id="log-console">操作を待機中...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ライブラリスクリプト -->
+  <script src="jQuery.1.11.1.ajax.rebuild.js"></script>
+  <!--<script src="jQuery.1.11.1.ajax.release.js"></script>-->
+  <!--<script src="jQuery.1.11.1.ajax.min.default.js"></script>-->
+
+  <!-- 実行ロジック -->
+  <script>
+    const logBox = document.getElementById('log-console');
+    function log(msg) {
+      const time = new Date().toLocaleTimeString();
+      const formatted = `[${time}] ${msg}\n`;
+      if (logBox.innerText === '操作を待機中...') {
+        logBox.innerText = `[システム] Jq-Ajax を window.J$ にマウントしました (グローバル $ および jQuery への汚染ゼロ)。\n` + formatted;
+      } else {
+        logBox.innerText += formatted;
+      }
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    // 1. AJAX リクエスト送信 (GET/POST, JSON/XML/HTML/Textに対応)
+    document.getElementById('btn-ajax-send').addEventListener('click', function () {
+      const url = document.getElementById('ajax-url').value;
+      const method = document.getElementById('ajax-method').value;
+      const dataType = document.getElementById('ajax-datatype').value;
+      const dataRaw = document.getElementById('ajax-data').value.trim();
+
+      let data = undefined;
+      if (dataRaw) {
+        try {
+          data = JSON.parse(dataRaw);
+        } catch (e) {
+          data = dataRaw;
+        }
+      }
+
+      log(`[XHR] ${method} リクエストを開始: ${url} | dataType: ${dataType}`);
+
+      window.J$.ajax({
+        url: url,
+        type: method,
+        dataType: dataType,
+        data: data
+      })
+        .done(function (res) {
+          let output = res;
+          if (dataType === 'json') {
+            output = JSON.stringify(res);
+          } else if (dataType === 'xml') {
+            output = res && res.nodeType ? new XMLSerializer().serializeToString(res) : `${res}`;
+          } else if (res && res.nodeType) {
+            output = res.outerHTML || res.textContent;
+          }
+          log(`[XHR 成功] ${dataType.toUpperCase()} 応答受信:\n${output}`);
+        })
+        .fail(function (xhr, status, error) {
+          log(`[XHR 失敗] ステータス: ${status}, エラー: ${error && error.message || error}`);
+        });
+    });
+
+    // 2. POST リクエスト送信
+    document.getElementById('btn-ajax-post').addEventListener('click', function () {
+      const url = document.getElementById('post-url').value;
+      const dataRaw = document.getElementById('post-data').value.trim();
+
+      let data = undefined;
+      if (dataRaw) {
+        try {
+          data = JSON.parse(dataRaw);
+        } catch (e) {
+          data = dataRaw;
+        }
+      }
+
+      log(`[XHR POST] POST リクエストを開始: ${url}`);
+
+      window.J$.ajax({
+        url: url,
+        type: 'POST',
+        dataType: 'json',
+        data: data
+      })
+        .done(function (res) {
+          log(`[XHR POST 成功] 応答受信:\n${JSON.stringify(res)}`);
+        })
+        .fail(function (xhr, status, error) {
+          log(`[XHR POST 失敗] ステータス: ${status}, エラー: ${error && error.message || error}`);
+        });
+    });
+
+    // 3. JSONP リクエスト送信
+    document.getElementById('btn-jsonp-get').addEventListener('click', function () {
+      const url = document.getElementById('jsonp-url').value;
+      log(`[JSONP] クロスドメイン要求を開始: ${url}`);
+
+      window.J$.ajax({
+        url: url,
+        dataType: 'jsonp',
+        jsonp: 'callback'
+      })
+        .done(function (data) {
+          log(`[JSONP 成功] ラッピングされた JSONP 応答を受信:\n${JSON.stringify(data.meta || data)}`);
+        })
+        .fail(function (xhr, status, error) {
+          log(`[JSONP 失敗] ステータス: ${status}, エラー: ${error && error.message || error}`);
+        });
+    });
+  </script>
+</body>
+
+</html>
